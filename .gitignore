@@ -1,14 +1,11 @@
-/CCTV_IDIOTS - Like domino’s 😂 [1635307095921766401].mp4
+*.mp4
 /faded
-/faded_20230317
-/faded_2023年3月13日
-/faded_2023年3月14日
+/faded_*
 /fonts
 /magick
 /output
 /res
-/res_2023年3月13日
-/res_2023年3月14日
+/res_*
 /temp.json
-/testTEMP_MPY_wvf_snd.mp3
+*.mp3
 /twitter_list.json
