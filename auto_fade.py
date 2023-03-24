@@ -1,6 +1,10 @@
+# -*- coding: utf-8 -*-
+
 import os
 import sys
-from moviepy.editor import VideoFileClip, concatenate_videoclips
+import traceback
+
+from moviepy.editor import VideoFileClip, concatenate_videoclips,ImageClip
 from moviepy.editor import vfx
 
 FADEIN_TIME=0.75
@@ -32,14 +36,21 @@ count = 0
 # 遍历文件夹中的所有文件
 for file_name in os.listdir(folder_path):
     # 检查文件是否为视频文件
-    if file_name.endswith('.mp4') or file_name.endswith('.avi'):
+    #if file_name.endswith('.mp4') or file_name.endswith('.avi') or file_name.endswith('.jpg'):
+    if file_name.endswith('.mp4') or file_name.endswith('.avi') :
         # 构造视频文件的绝对路径
         file_path = os.path.join(folder_path, file_name)
         print(f"processing: {file_path}")
         # 加载视频文件并将其添加到clips_list列表中
         try:
-            clip = VideoFileClip(file_path)
-            bitrate = int(clip.fps * clip.size[0] * clip.size[1] * 0.0001)+1
+            if file_name.endswith(".jpg"):
+                clip = ImageClip(file_path)
+                clip.set_duration(5.0)
+                clip_fps = 30
+            else:
+                clip = VideoFileClip(file_path)
+                clip_fps = clip.fps
+            bitrate = int(clip_fps * clip.size[0] * clip.size[1] * 0.0001)+1
             
 
             # file_size = os.path.getsize(clip.filename)
@@ -49,6 +60,7 @@ for file_name in os.listdir(folder_path):
             bitrate_str = f"{bitrate}k"
             # Print bitrate_str as info
             print(f"bitrate_str: {bitrate_str}")
+            print(f"clip.fps: {clip_fps}")
 
             print(clip.duration)
             clips_list.append(clip)
@@ -56,9 +68,12 @@ for file_name in os.listdir(folder_path):
             new_clip = new_clip.fx(vfx.fadeout, FADEOUT_TIME)
             # file_name = "test.mp4"
             output_file_path = os.path.join("faded", file_name)
-            new_clip.write_videofile(output_file_path,codec="libx264", fps=clip.fps ,bitrate=bitrate_str)
+            new_clip.write_videofile(output_file_path,codec="libx264", fps=clip_fps ,bitrate=bitrate_str)
             count=count+1
         except Exception as e:
+            print("Error occurred while processing: ", file_path)
+            print(traceback.format_exc())
+
             print(e)
             print("continue to next.")    
 
