@@ -49,50 +49,70 @@ for user in twitter_list:
         query = f"(from:{user}) since:{since_date} until:{until_date}"
     print(f"query:{query}")
     for tweet in sntwitter.TwitterSearchScraper(query).get_items():
+        # tweet_date_str = tweet.date.strftime("%Y-%m-%d")
+        # since_date_str = datetime.datetime.strptime(since_date, "%Y-%m-%d").strftime("%Y-%m-%d")
+
+        # # print(f"Tweet date {tweet_date_str} {since_date_str=}")
+        # if tweet_date_str == since_date_str:
+        #     print(f"Tweet date {tweet_date_str} is equal to since_date, skip")
+        #     continue
+
         #print(vars(tweet))
         save_file_name = f"{user}_{tweet.date}".replace(" ","_").replace(":","：")
         print(save_file_name)
         #print(tweet.media)
         if tweet.media is not None and len(tweet.media) == 1:
-            video = tweet.media[0]
+
+            
+            media = tweet.media[0]
             #print(type(video))
-            if type(video) != sntwitter.Video:
-                print(f"not a video. ({type(video)})")
-                continue
-            #print(video.variants)
-            max_bitrate = 0
-            max_bitrate_video = None
-            
-            #find the max bitrate video variant
-            for video_info in video.variants:
-                if video_info.bitrate is not None and video_info.bitrate > max_bitrate:
-                    max_bitrate = video_info.bitrate
-                    max_bitrate_video = video_info
-            # no proper video variant found
-            if max_bitrate_video is None:
-                continue
+            if type(media) == sntwitter.Video:
+                
+                video = media
+                #print(video.variants)
+                max_bitrate = 0
+                max_bitrate_video = None
+                
+                #find the max bitrate video variant
+                for video_info in video.variants:
+                    if video_info.bitrate is not None and video_info.bitrate > max_bitrate:
+                        max_bitrate = video_info.bitrate
+                        max_bitrate_video = video_info
+                # no proper video variant found
+                if max_bitrate_video is None:
+                    continue
+    
+                
+                # #requests: download video file, and save it. 
+                # response = requests.get(max_bitrate_video.url,stream=True)
+                # total_size = int(response.headers.get('content-length', 0))
+                # block_size = 1024 # 1 Kibibyte
+                # progress_bar = tqdm(total=total_size, unit='iB', unit_scale=True)
+                # with open(f"res/{save_file_name}.mp4","wb") as file:
+                #     for data in response.iter_content(block_size):
+                #         progress_bar.update(len(data))
+                #         file.write(data)
+    
+                # progress_bar.close()
+    
+                # if total_size != 0 and progress_bar.n != total_size:
+                #     print("下载失败")
+                # else:
+                #     print("下载完成")      
+    
+                #yt-dlp
+                import subprocess
+                subprocess.call(['proxychains','yt-dlp', '-P', 'res', tweet.url])
+                
+            if type(media) == sntwitter.Photo:
+                print(media)
+                media_format = media.fullUrl.split("=")[1].split("&")[0]
 
-            
-            # #requests: download video file, and save it. 
-            # response = requests.get(max_bitrate_video.url,stream=True)
-            # total_size = int(response.headers.get('content-length', 0))
-            # block_size = 1024 # 1 Kibibyte
-            # progress_bar = tqdm(total=total_size, unit='iB', unit_scale=True)
-            # with open(f"res/{save_file_name}.mp4","wb") as file:
-            #     for data in response.iter_content(block_size):
-            #         progress_bar.update(len(data))
-            #         file.write(data)
+                response = requests.get(media.fullUrl)
+                with open(f"res/{save_file_name}.{media_format}","wb") as file:
+                    file.write(response.content)
 
-            # progress_bar.close()
-
-            # if total_size != 0 and progress_bar.n != total_size:
-            #     print("下载失败")
-            # else:
-            #     print("下载完成")      
-
-            #yt-dlp
-            import subprocess
-            subprocess.call(['proxychains','yt-dlp', '-P', 'res', tweet.url])
+       
 
         else:
             print("no media")
