@@ -4,7 +4,7 @@ from tkinter import messagebox
 
 def handle_input():
     input_text = text_box.get("1.0", "end-1c")
-    print(input_text)
+    #print(input_text)
 
     #split input_text with "\n", then find all lines begin with "@"
     lines = input_text.split("\n")
