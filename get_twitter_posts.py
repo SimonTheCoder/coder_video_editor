@@ -6,6 +6,7 @@ import snscrape.modules.twitter as sntwitter
 import sys
 import os
 import requests
+import datetime
 from tqdm import tqdm
 
 import json
@@ -20,15 +21,24 @@ if not os.path.exists("twitter_list.json"):
 with open("twitter_list.json", "r") as file:
     twitter_list = json.load(file)
 
+if len(sys.argv) == 1:
+    today = datetime.datetime.now()
+    since_date = (today - datetime.timedelta(days=2)).strftime("%Y-%m-%d")
+    until_date = (today - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    print(f"No arguments provided. Using default values for since_date: {since_date} and until_date: {until_date}.")
+elif sys.argv[1] in ["-h","--help","help"]:
+    print("Usage:")
+    print("python get_twitter_posts.py [since_date] [until_date]")
+    print("since_date and until_date should be in the format of YYYY-MM-DD")
+    print("If no arguments are provided, the default values for since_date and until_date will be used.")
+else:    
+    since_date = sys.argv[1]
+    
+    if len(sys.argv) == 3:
+        until_date = sys.argv[2]
+    else:
+        until_date = None
 
-since_date = sys.argv[1]
-if len(sys.argv) == 3:
-    until_date = sys.argv[2]
-else:
-    until_date = None
-
-import os
-import datetime
 
 # Check if ./res exists and rename it to ./res_<current_date>
 if os.path.exists("./res"):
